@@ -1,5 +1,8 @@
 package oncall
 
+import oncall.controller.MonthlyWorkScheduleController
+import oncall.controller.error.InputErrorHandler
+
 fun main() {
-    TODO("프로그램 구현")
+    MonthlyWorkScheduleController(InputErrorHandler()).start()
 }
