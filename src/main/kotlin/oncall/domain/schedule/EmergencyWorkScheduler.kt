@@ -6,9 +6,7 @@ import java.util.*
 class EmergencyWorkScheduler() : WorkScheduler {
 
     override fun schedule(
-        date: MonthlyDate,
-        weekDayWorkers: List<String>,
-        holidaysWorkers: List<String>
+        date: MonthlyDate, weekDayWorkers: List<String>, holidaysWorkers: List<String>
     ): List<String> {
         val workScheduler = mutableListOf<String>()
         val workSchedulerDate = mutableListOf<MonthlyDate>()
@@ -18,52 +16,50 @@ class EmergencyWorkScheduler() : WorkScheduler {
         val weekDayWorkers = LinkedList(weekDayWorkers.extended())
 
         var currentDate = date
+
         while (true) {
             val previousWorker = workScheduler.lastOrNull()
             workSchedulerDate.add(currentDate)
-            // 휴일 + 주말
-            if (currentDate.isHoliday() || currentDate.isWeekend()) {
-                val worker: String = if (restHolidayWorkers.isNotEmpty()) {
-                    restHolidayWorkers.remove()
-                } else {
-                    // 이전 일한 사람이 없으면
-                    if (previousWorker.isNullOrBlank()) {
-                        holidaysWorkers.remove()
-                    } else {
-                        val tmp = holidaysWorkers.remove()
-                        if (previousWorker == tmp) {
-                            restHolidayWorkers.add(tmp)
-                            holidaysWorkers.remove()
-                        } else {
-                            tmp
-                        }
-                    }
-                }
-                workScheduler.add(worker)
-            }
-            // 평일
-            else {
-                val worker: String = if (restWeekdayWorkers.isNotEmpty()) {
-                    restWeekdayWorkers.remove()
-                } else {
-                    if (previousWorker.isNullOrBlank()) {
-                        weekDayWorkers.remove()
-                    } else {
-                        val tmp = weekDayWorkers.remove()
-                        if (previousWorker == tmp) {
-                            restWeekdayWorkers.add(tmp)
-                            weekDayWorkers.remove()
-                        } else {
-                            tmp
-                        }
-                    }
-                }
-                workScheduler.add(worker)
-            }
+            val worker = selectWorkerByDate(
+                currentDate, previousWorker, restWeekdayWorkers, weekDayWorkers, restHolidayWorkers, holidaysWorkers
+            )
+            workScheduler.add(worker)
             if (currentDate.hasNext().not()) break
             currentDate = currentDate.next()
         }
+
         return workScheduler.mapIndexed { i, worker -> "${workSchedulerDate[i]} $worker" }
+    }
+
+    private fun selectWorkerByDate(
+        date: MonthlyDate,
+        previousWorker: String?,
+        restWeekdayWorkers: LinkedList<String>,
+        weekDayWorkers: LinkedList<String>,
+        restHolidayWorkers: LinkedList<String>,
+        holidaysWorkers: LinkedList<String>,
+    ): String {
+        return if (date.isHoliday() || date.isWeekend()) {
+            selectWorker(previousWorker, restHolidayWorkers, holidaysWorkers)
+        } else {
+            selectWorker(previousWorker, restWeekdayWorkers, weekDayWorkers)
+        }
+    }
+
+    private fun selectWorker(
+        previousWorker: String?, restWorkers: LinkedList<String>, workers: LinkedList<String>
+    ): String {
+        return if (restWorkers.isNotEmpty()) {
+            restWorkers.remove()
+        } else {
+            val currentWorker = workers.remove()
+            if (previousWorker == currentWorker) {
+                restWorkers.add(currentWorker)
+                workers.remove()
+            } else {
+                currentWorker
+            }
+        }
     }
 
     private fun List<String>.extended(): List<String> {
