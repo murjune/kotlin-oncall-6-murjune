@@ -8,6 +8,10 @@ data class MonthlyDate(private val month: Int, private val dayOfMonth: Int, priv
         require(month in MONTH_RANGE) { MONTH_RANGE_ERROR_MESSAGE }
     }
 
+    constructor(month: String, dayOfWeek: String) : this(month.toInt(), 1, DayOfWeek.of(dayOfWeek)) {
+        require(month.all { it.isDigit() }) { "month 는 숫자여야 합니다" }
+    }
+
     // 다음날 주기
     fun next(): MonthlyDate {
         require(hasNext()) { "${limitDayOfMonth}일이 넘어갔습니다" }
