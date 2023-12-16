@@ -4,40 +4,45 @@ import oncall.domain.date.MonthlyDate
 import java.util.*
 
 class EmergencyWorkScheduler() : WorkScheduler {
+    private lateinit var workScheduler: MutableList<String>
+    private lateinit var workSchedulerDate: MutableList<MonthlyDate>
+    private lateinit var restHolidayWorkers: LinkedList<String>
+    private lateinit var restWeekdayWorkers: LinkedList<String>
+    private lateinit var holidaysWorkers: LinkedList<String>
+    private lateinit var weekDayWorkers: LinkedList<String>
 
     override fun schedule(
         date: MonthlyDate, weekDayWorkers: List<String>, holidaysWorkers: List<String>
     ): List<String> {
-        val workScheduler = mutableListOf<String>()
-        val workSchedulerDate = mutableListOf<MonthlyDate>()
-        val restHolidayWorkers = LinkedList<String>()
-        val restWeekdayWorkers = LinkedList<String>()
-        val holidaysWorkers = LinkedList(holidaysWorkers.extended())
-        val weekDayWorkers = LinkedList(weekDayWorkers.extended())
+        workScheduler = mutableListOf<String>()
+        workSchedulerDate = mutableListOf<MonthlyDate>()
+        restHolidayWorkers = LinkedList<String>()
+        restWeekdayWorkers = LinkedList<String>()
+        this.holidaysWorkers = LinkedList(holidaysWorkers.extended())
+        this.weekDayWorkers = LinkedList(weekDayWorkers.extended())
 
+        schedule(date)
+
+        return workScheduler.mapIndexed { i, worker -> "${workSchedulerDate[i]} $worker" }
+    }
+
+    private fun schedule(date: MonthlyDate) {
         var currentDate = date
-
         while (true) {
             val previousWorker = workScheduler.lastOrNull()
             workSchedulerDate.add(currentDate)
             val worker = selectWorkerByDate(
-                currentDate, previousWorker, restWeekdayWorkers, weekDayWorkers, restHolidayWorkers, holidaysWorkers
+                currentDate, previousWorker
             )
             workScheduler.add(worker)
             if (currentDate.hasNext().not()) break
             currentDate = currentDate.next()
         }
-
-        return workScheduler.mapIndexed { i, worker -> "${workSchedulerDate[i]} $worker" }
     }
 
     private fun selectWorkerByDate(
         date: MonthlyDate,
         previousWorker: String?,
-        restWeekdayWorkers: LinkedList<String>,
-        weekDayWorkers: LinkedList<String>,
-        restHolidayWorkers: LinkedList<String>,
-        holidaysWorkers: LinkedList<String>,
     ): String {
         return if (date.isHoliday() || date.isWeekend()) {
             selectWorker(previousWorker, restHolidayWorkers, holidaysWorkers)
