@@ -5,7 +5,7 @@ import oncall.domain.date.MonthlyDate
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-internal class EmergencyScheduleGeneratorTest {
+internal class EmergencyWorkSchedulerTest {
 
     @Test
     fun `기능 테스트`() {
@@ -20,7 +20,7 @@ internal class EmergencyScheduleGeneratorTest {
                 ","
             )
         // when
-        val res = EmergencyScheduleGenerator().generate(date, weekendWorkers, holidayWorkers)
+        val res = EmergencyWorkScheduler().schedule(date, weekendWorkers, holidayWorkers)
         // then
         assertThat<List<String>>(res).isEqualTo(
             """
@@ -61,12 +61,12 @@ internal class EmergencyScheduleGeneratorTest {
     @Test
     fun `기능 테스트 2`() {
         // given
-        val generator = EmergencyScheduleGenerator()
+        val generator = EmergencyWorkScheduler()
         val date = MonthlyDate(5, 1, DayOfWeek.of("월"))
         val weekDayWorkers = "준팍,도밥,고니,수아,루루,글로,솔로스타,우코,슬링키,참새,도리".split(",")
         val holidaysWorkers = "수아,루루,글로,솔로스타,우코,슬링키,참새,도리,준팍,도밥,고니".split(",")
         // when
-        val result = generator.generate(date, weekDayWorkers, holidaysWorkers)
+        val result = generator.schedule(date, weekDayWorkers, holidaysWorkers)
         // then
         assertThat(result).isEqualTo(
             """

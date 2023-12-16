@@ -2,8 +2,8 @@ package oncall.controller
 
 import oncall.controller.error.ErrorHandler
 import oncall.domain.date.MonthlyDate
-import oncall.domain.schedule.EmergencyScheduleGenerator
-import oncall.domain.schedule.ScheduleGenerator
+import oncall.domain.schedule.EmergencyWorkScheduler
+import oncall.domain.schedule.WorkScheduler
 import oncall.view.InputView
 import oncall.view.OutputView
 
@@ -12,7 +12,7 @@ class MonthlyWorkScheduleController(
 ) {
     private val outputView = OutputView()
     private val inputView = InputView()
-    private val scheduleGenerator: ScheduleGenerator = EmergencyScheduleGenerator()
+    private val workScheduler: WorkScheduler = EmergencyWorkScheduler()
     private lateinit var today: MonthlyDate
     private lateinit var weekdayWorkers: List<String>
     private lateinit var holidayWorkers: List<String>
@@ -53,7 +53,7 @@ class MonthlyWorkScheduleController(
     }
 
     private fun showScheduleResult() {
-        val result = scheduleGenerator.generate(today, weekdayWorkers, holidayWorkers)
+        val result = workScheduler.schedule(today, weekdayWorkers, holidayWorkers)
         outputView.writeMonthlyWorkScheduleResult(result)
     }
 
